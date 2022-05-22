@@ -1,23 +1,79 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import BasicTextFields from "./components/atoms/BasicTextFields";
+import { Route, Routes, useNavigate } from "react-router-dom";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "./firebase/config";
+import Home from "./components/pages/Home";
 
 function App() {
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  let navigate = useNavigate();
+
+  const handleAction = (id) => {
+    if (id === 1) {
+      signInWithEmailAndPassword(auth, email, password).then((res) => {
+        navigate("/");
+        sessionStorage.setItem("Auth Token", res._tokenResponse.refreshToken);
+      });
+    }
+    if (id === 2) {
+      createUserWithEmailAndPassword(auth, email, password).then((res) => {
+        navigate("/");
+        sessionStorage.setItem("Auth Token", res._tokenResponse.refreshToken);
+      });
+    }
+    setEmail("");
+    setPassword("");
+  };
+  React.useEffect(() => {
+    let authToken = sessionStorage.getItem("Auth Token");
+
+    if (authToken) {
+      navigate("/");
+    }
+    if (!authToken) {
+      navigate("/login");
+    }
+  }, [navigate]);
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {/* <BasicTextFields /> */}
+      <>
+        <Routes>
+          <Route
+            path="/login"
+            element={
+              <BasicTextFields
+                title="Login"
+                setEmail={setEmail}
+                setPassword={setPassword}
+                email={email}
+                password={password}
+                handleAction={() => handleAction(1)}
+              />
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <BasicTextFields
+                title="register"
+                setEmail={setEmail}
+                setPassword={setPassword}
+                email={email}
+                password={password}
+                handleAction={() => handleAction(2)}
+              />
+            }
+          />
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </>
     </div>
   );
 }
