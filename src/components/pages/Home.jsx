@@ -5,12 +5,13 @@ const Home = () => {
   let navigate = useNavigate();
   const handleLogout = () => {
     sessionStorage.removeItem("Auth Token");
-    navigate("/login");
+    navigate("/login", { replace: true });
+    window.location.reload();
   };
   React.useEffect(() => {
     let authToken = sessionStorage.getItem("Auth Token");
     if (authToken) {
-      navigate("/");
+      navigate("/home");
     }
     if (!authToken) {
       navigate("/login");
